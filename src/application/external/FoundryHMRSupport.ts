@@ -1,4 +1,4 @@
-import { TJSAppIndex } from '../internal/index.js';
+import { TJSAppIndex } from '../internal';
 
 export class FoundryHMRSupport
 {
@@ -6,7 +6,7 @@ export class FoundryHMRSupport
    {
       if (import.meta.hot)
       {
-         Hooks.on('hotReload', (data) =>
+         Hooks.on('hotReload', (data): boolean =>
          {
             // Only handle JSON hot reload presumably specified in package manifest for language translation files.
             if (data?.extension === 'json')

@@ -1,31 +1,38 @@
 import { isObject }  from '#runtime/util/object';
 
+import type { EasingReference }        from '#runtime/svelte/easing';
+import type {
+   Data,
+   TJSPositionTypes }                  from "#runtime/svelte/store/position";
+
+import type { SvelteApplication }      from '../../SvelteApplication';
+
+import type {
+   ApplicationState,
+   ApplicationStateData }              from './types';
+
 /**
  * Provides the ability the save / restore / serialize application state for positional and UI state such as minimized
  * status.
  *
- * You can restore a saved state with animation; please see the options of {@link ApplicationState.restore}.
+ * You can restore a saved state with animation; please see the options of {@link ApplicationStateImpl.restore}.
  */
-export class ApplicationState
+export class ApplicationStateImpl implements ApplicationState
 {
-   /** @type {object} */
-   #application;
+   readonly #application: SvelteApplication & TJSPositionTypes.Positionable;
 
    /**
     * Stores the current save state key being restored by animating. When a restore is already being animated with the
     * same name the subsequent restore animation is ignored.
-    *
-    * @type {string | undefined}
     */
-   #currentRestoreKey;
+   #currentRestoreKey: string | undefined;
 
-   /** @type {Map<string, import('./types').ApplicationStateData>} */
-   #dataSaved = new Map();
+   #dataSaved: Map<string, ApplicationStateData> = new Map();
 
    /**
-    * @param {object}   application - The application.
+    * @param application - The application.
     */
-   constructor(application)
+   constructor(application: SvelteApplication & TJSPositionTypes.Positionable)
    {
       this.#application = application;
 
@@ -35,7 +42,7 @@ export class ApplicationState
    /**
     * Clears all saved application state.
     */
-   clear()
+   clear(): void
    {
       this.#dataSaved.clear();
    }
@@ -43,14 +50,14 @@ export class ApplicationState
    /**
     * Returns current application state along with any extra data passed into method.
     *
-    * @param {object} [extra] - Extra data to add to application state.
+    * @param [extra] - Extra data to add to application state.
     *
-    * @returns {import('./types').ApplicationStateData} Passed in object with current application state.
+    * @returns Passed in object with current application state.
     */
-   current(extra = {})
+   current(extra: object = {}): ApplicationStateData
    {
       return Object.assign(extra, {
-         position: this.#application?.position?.get(),
+         position: this.#application?.position?.get() as Data.TJSPositionData,
          beforeMinimized: this.#application?.position?.state.get({ name: '#beforeMinimized' }),
          options: this.#application?.reactive?.toJSON(),
          ui: { minimized: this.#application?.reactive?.minimized }
@@ -60,13 +67,13 @@ export class ApplicationState
    /**
     * Gets any saved application state by name.
     *
-    * @param {object}   options - Options.
+    * @param options - Options.
     *
-    * @param {string}   options.name - Saved data set name.
+    * @param options.name - Saved data set name.
     *
-    * @returns {import('./types').ApplicationStateData | undefined} Any saved application state.
+    * @returns Any saved application state.
     */
-   get({ name })
+   get({ name }: { name: string }): ApplicationStateData | undefined
    {
       if (typeof name !== 'string')
       {
@@ -77,9 +84,9 @@ export class ApplicationState
    }
 
    /**
-    * @returns {IterableIterator<string>} The saved application state names / keys.
+    * @returns The saved application state names / keys.
     */
-   keys()
+   keys(): IterableIterator<string>
    {
       return this.#dataSaved.keys();
    }
@@ -87,17 +94,17 @@ export class ApplicationState
    /**
     * Removes and returns any saved application state by name.
     *
-    * @param {object}   options - Options.
+    * @param options - Options.
     *
-    * @param {string}   options.name - Name to remove and retrieve.
+    * @param options.name - Name to remove and retrieve.
     *
-    * @returns {import('./types').ApplicationStateData | undefined} Any saved application state.
+    * @returns Any saved application state.
     */
-   remove({ name })
+   remove({ name }: { name: string }): ApplicationStateData | undefined
    {
       if (typeof name !== 'string') { throw new TypeError(`ApplicationState - remove: 'name' is not a string.`); }
 
-      const data = this.#dataSaved.get(name);
+      const data: ApplicationStateData = this.#dataSaved.get(name);
       this.#dataSaved.delete(name);
 
       return data;
@@ -109,29 +116,30 @@ export class ApplicationState
     * {@link #runtime/svelte/store/position!AnimationAPI.to} and the duration and easing name or function may be
     * specified.
     *
-    * @param {object}            options - Options.
+    * @param options - Options.
     *
-    * @param {string}            options.name - Saved data set name.
+    * @param options.name - Saved data set name.
     *
-    * @param {boolean}           [options.remove=false] - Remove data set.
+    * @param [options.remove=false] - Remove data set.
     *
-    * @param {boolean}           [options.animateTo=false] - Animate to restore data.
+    * @param [options.animateTo=false] - Animate to restore data.
     *
-    * @param {number}            [options.duration=0.1] - Duration in seconds.
+    * @param [options.duration=0.1] - Duration in seconds.
     *
-    * @param {import('#runtime/svelte/easing').EasingReference} [options.ease='linear'] - Easing function or easing
-    *        function name.
+    * @param [options.ease='linear'] - Easing function or easing function name.
     *
-    * @returns {import('./types').ApplicationStateData | undefined} Any saved application state.
+    * @returns Any saved application state.
     */
-   restore({ name, remove = false, animateTo = false, duration = 0.1, ease = 'linear' })
+   restore({ name, remove = false, animateTo = false, duration = 0.1, ease = 'linear' }:
+    { name: string, remove?: boolean, animateTo?: boolean, duration?: number, ease?: EasingReference }):
+     ApplicationStateData | undefined
    {
       if (typeof name !== 'string')
       {
          throw new TypeError(`ApplicationState - restore error: 'name' is not a string.`);
       }
 
-      const dataSaved = this.#dataSaved.get(name);
+      const dataSaved: ApplicationStateData = this.#dataSaved.get(name);
 
       if (dataSaved)
       {
@@ -218,23 +226,23 @@ export class ApplicationState
     * @privateRemarks
     * TODO: THIS METHOD NEEDS TO BE REFACTORED WHEN TRL IS MADE INTO A STANDALONE FRAMEWORK.
     *
-    * @param {import('./types').ApplicationStateData}   data - Saved data set name.
+    * @param data - Saved data set name.
     *
-    * @param {object}            [opts] - Optional parameters
+    * @param [opts] - Optional parameters
     *
-    * @param {boolean}           [opts.async=false] - If animating return a Promise that resolves with any saved data.
+    * @param [opts.async=false] - If animating return a Promise that resolves with any saved data.
     *
-    * @param {boolean}           [opts.animateTo=false] - Animate to restore data.
+    * @param [opts.animateTo=false] - Animate to restore data.
     *
-    * @param {number}            [opts.duration=0.1] - Duration in seconds.
+    * @param [opts.duration=0.1] - Duration in seconds.
     *
-    * @param {import('#runtime/svelte/easing').EasingReference} [opts.ease='linear'] - Easing function or easing
-    *        function name.
+    * @param [opts.ease='linear'] - Easing function or easing function name.
     *
     * @returns {undefined | Promise<void>} When asynchronous the animation Promise.
     */
-   #setImpl(data, { async = false, animateTo = false, duration = 0.1, ease = 'linear' } = {})
-   {
+   #setImpl(data: ApplicationStateData, { async = false, animateTo = false, duration = 0.1, ease = 'linear' }:
+    { async?: boolean; animateTo?: boolean; duration?: number; ease?: EasingReference; } = {}):
+     Promise<void> | undefined {
       if (!isObject(data))
       {
          throw new TypeError(`ApplicationState - restore error: 'data' is not an object.`);

@@ -10,18 +10,18 @@ declare interface GetSvelteData
    /**
     * Returns any mounted {@link MountedAppShell}.
     *
-    * @returns {MountedAppShell | null} Any mounted application shell.
+    * @returns Any mounted application shell.
     */
-   get applicationShell(): MountedAppShell;
+   get applicationShell(): MountedAppShell | null;
 
    /**
     * Returns the indexed Svelte component.
     *
-    * @param {number}   index - The index of Svelte component to retrieve.
+    * @param index - The index of the Svelte component instance to retrieve.
     *
-    * @returns {SvelteComponent} The loaded Svelte component.
+    * @returns The loaded Svelte component.
     */
-   component(index: number): object;
+   component(index: number): SvelteComponent | undefined;
 
    /**
     * Returns the Svelte component entries iterator.

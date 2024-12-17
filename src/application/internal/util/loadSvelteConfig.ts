@@ -1,25 +1,33 @@
-import { TJSSvelteConfigUtil }   from '#runtime/svelte/util';
-import { CrossWindow }           from '#runtime/util/browser';
-import { isObject }              from '#runtime/util/object';
+import { TJSSvelteConfigUtil }      from '#runtime/svelte/util';
+import { CrossWindow }              from '#runtime/util/browser';
+import { isObject }                 from '#runtime/util/object';
 
-import { isApplicationShell }    from './isApplicationShell.js';
+import { isApplicationShell }       from './isApplicationShell';
+
+import type {
+   ComponentConstructorOptions,
+   SvelteComponent }                from 'svelte';
+import type { TJSSvelteConfig }     from '#runtime/svelte/util';
+import type { SvelteData }          from '../state-svelte/types';
+import type { SvelteApplication }   from '../../SvelteApplication';
 
 /**
  * Instantiates and attaches a Svelte component to the main inserted HTML.
  *
- * @param {object}            [opts] - Optional parameters.
+ * @param [opts] - Optional parameters.
  *
- * @param {object}            [opts.app] - The target application
+ * @param [opts.app] - The target application
  *
- * @param {import('#runtime/svelte/util').TJSSvelteConfig}  [opts.config] - Svelte component options
+ * @param [opts.config] - Svelte component options
  *
- * @param {Function}          [opts.elementRootUpdate] - A callback to assign to the external context.
+ * @param [opts.elementRootUpdate] - A callback to assign to the external context.
  *
- * @returns {import('#svelte-fvtt/application').SvelteData} The config + instantiated Svelte component.
+ * @returns {SvelteData} The config + instantiated Svelte component.
  */
-export function loadSvelteConfig({ app, config, elementRootUpdate } = {})
+export function loadSvelteConfig({ app, config, elementRootUpdate }:
+ { app?: SvelteApplication; config?: TJSSvelteConfig; elementRootUpdate: Function; }): SvelteData
 {
-   let target;
+   let target: HTMLElement;
 
    // A specific HTMLElement to append Svelte component.
    if (CrossWindow.isHTMLElement(config.target))
@@ -42,11 +50,11 @@ export function loadSvelteConfig({ app, config, elementRootUpdate } = {})
       throw new Error();
    }
 
-   const NewSvelteComponent = config.class;
+   const NewSvelteComponent: { new (options: ComponentConstructorOptions): SvelteComponent } = config.class;
 
-   const svelteConfig = TJSSvelteConfigUtil.parseConfig({ ...config, target }, app);
+   const svelteConfig: TJSSvelteConfig = TJSSvelteConfigUtil.parseConfig({ ...config, target }, app);
 
-   const externalContext = svelteConfig.context.get('#external');
+   const externalContext: any = (svelteConfig.context as Map<string, any>).get('#external');
 
    // Inject the Foundry application instance and `elementRootUpdate` to the external context.
    externalContext.application = app;
@@ -56,8 +64,10 @@ export function loadSvelteConfig({ app, config, elementRootUpdate } = {})
    let eventbus;
 
    // Potentially inject any TyphonJS eventbus and track the proxy in the SvelteData instance.
+   // @ts-ignore
    if (isObject(app._eventbus) && typeof app._eventbus.createProxy === 'function')
    {
+      // @ts-ignore
       eventbus = app._eventbus.createProxy();
       externalContext.eventbus = eventbus;
    }
@@ -66,24 +76,16 @@ export function loadSvelteConfig({ app, config, elementRootUpdate } = {})
    Object.seal(externalContext);
 
    // Create the Svelte component.
-   /**
-    * @type {import('svelte').SvelteComponent}
-    */
-   const component = new NewSvelteComponent(svelteConfig);
+   const component: SvelteComponent = new NewSvelteComponent(svelteConfig as ComponentConstructorOptions);
 
    // Set any eventbus to the config.
+   // @ts-ignore
    svelteConfig.eventbus = eventbus;
 
-   /**
-    * @type {HTMLElement}
-    */
-   let element;
+   let element: HTMLElement;
 
    // We can directly get the root element from components which follow the application store contract.
-   if (isApplicationShell(component))
-   {
-      element = component.elementRoot;
-   }
+   if (isApplicationShell(component)) { element = component.elementRoot; }
 
    if (!CrossWindow.isHTMLElement(element))
    {

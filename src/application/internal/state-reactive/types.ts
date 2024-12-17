@@ -65,21 +65,21 @@ import type { WebStorage } from '#runtime/svelte/store/web-storage';
 declare interface SvelteReactive
 {
    /**
-    * @returns {WebStorage} Returns WebStorage (session) instance.
+    * @returns Returns WebStorage (session) instance.
     */
    get sessionStorage(): WebStorage;
 
    /**
     * Returns the store for app options.
     *
-    * @returns {StoreAppOptions} App options store.
+    * @returns App options store.
     */
    get storeAppOptions(): StoreAppOptions;
 
    /**
     * Returns the store for UI options.
     *
-    * @returns {StoreUIOptions} UI options store.
+    * @returns UI options store.
     */
    get storeUIState(): StoreUIOptions;
 
@@ -88,35 +88,35 @@ declare interface SvelteReactive
    /**
     * Returns the draggable app option.
     *
-    * @returns {boolean} Draggable app option.
+    * @returns Draggable app option.
     */
    get draggable(): boolean;
 
    /**
     * Sets `this.options.draggable` which is reactive for application shells.
     *
-    * @param {boolean}  draggable - Sets the draggable option.
+    * @param draggable - Sets the draggable option.
     */
    set draggable(draggable: boolean);
 
    /**
     * Returns the focusAuto app option.
     *
-    * @returns {boolean} When true auto-management of app focus is enabled.
+    * @returns When true auto-management of app focus is enabled.
     */
    get focusAuto(): boolean;
 
    /**
     * Sets `this.options.focusAuto` which is reactive for application shells.
     *
-    * @param {boolean}  focusAuto - Sets the focusAuto option.
+    * @param focusAuto - Sets the focusAuto option.
     */
    set focusAuto(focusAuto: boolean);
 
    /**
     * Returns the focusKeep app option.
     *
-    * @returns {boolean} When `focusAuto` and `focusKeep` is true; keeps internal focus.
+    * @returns When `focusAuto` and `focusKeep` is true; keeps internal focus.
     */
    get focusKeep(): boolean;
 
@@ -165,56 +165,56 @@ declare interface SvelteReactive
    /**
     * Sets `this.options.headerButtonNoLabel` which is reactive for application shells.
     *
-    * @param {boolean}  headerButtonNoLabel - Sets the headerButtonNoLabel option.
+    * @param headerButtonNoLabel - Sets the headerButtonNoLabel option.
     */
    set headerButtonNoLabel(headerButtonNoLabel: boolean);
 
    /**
     * Returns the headerIcon app option.
     *
-    * @returns {string | undefined} URL for header app icon.
+    * @returns URL for header app icon.
     */
    get headerIcon(): string | undefined;
 
    /**
     * Sets `this.options.headerIcon` which is reactive for application shells.
     *
-    * @param {string | undefined}  headerIcon - Sets the headerButtonNoLabel option.
+    * @param headerIcon - Sets the headerButtonNoLabel option.
     */
    set headerIcon(headerIcon: string | undefined);
 
    /**
     * Returns the headerNoTitleMinimized app option.
     *
-    * @returns {boolean} When true removes the header title when minimized.
+    * @returns When true removes the header title when minimized.
     */
    get headerNoTitleMinimized(): boolean;
 
    /**
     * Sets `this.options.headerNoTitleMinimized` which is reactive for application shells.
     *
-    * @param {boolean}  headerNoTitleMinimized - Sets the headerNoTitleMinimized option.
+    * @param headerNoTitleMinimized - Sets the headerNoTitleMinimized option.
     */
    set headerNoTitleMinimized(headerNoTitleMinimized: boolean);
 
    /**
     * Returns the minimizable app option.
     *
-    * @returns {boolean} Minimizable app option.
+    * @returns Minimizable app option.
     */
    get minimizable(): boolean;
 
    /**
     * Sets `this.options.minimizable` which is reactive for application shells that are also pop out.
     *
-    * @param {boolean}  minimizable - Sets the minimizable option.
+    * @param minimizable - Sets the minimizable option.
     */
    set minimizable(minimizable: boolean);
 
    /**
     * Returns the Foundry popOut state; {@link ApplicationOptions.popOut}
     *
-    * @returns {boolean} Positionable app option.
+    * @returns Positionable app option.
     */
    get popOut(): boolean;
 
@@ -222,42 +222,42 @@ declare interface SvelteReactive
     * Sets `this.options.popOut` which is reactive for application shells. This will add / remove this application
     * from `ui.windows`.
     *
-    * @param {boolean}  popOut - Sets the popOut option.
+    * @param popOut - Sets the popOut option.
     */
    set popOut(popOut: boolean);
 
    /**
     * Returns the positionable app option; {@link SvelteApp.Options.positionable}
     *
-    * @returns {boolean} Positionable app option.
+    * @returns Positionable app option.
     */
    get positionable(): boolean;
 
    /**
     * Sets `this.options.positionable` enabling / disabling {@link SvelteApplication.position}.
     *
-    * @param {boolean}  positionable - Sets the positionable option.
+    * @param positionable - Sets the positionable option.
     */
    set positionable(positionable: boolean);
 
    /**
     * Returns the resizable option.
     *
-    * @returns {boolean} Resizable app option.
+    * @returns Resizable app option.
     */
    get resizable(): boolean;
 
    /**
     * Sets `this.options.resizable` which is reactive for application shells.
     *
-    * @param {boolean}  resizable - Sets the resizable option.
+    * @param resizable - Sets the resizable option.
     */
    set resizable(resizable: boolean);
 
    /**
     * Returns the title accessor from the parent Application class; {@link ApplicationOptions.title}
     *
-    * @returns {string} Title.
+    * @returns Title.
     */
    get title(): string;
 
@@ -266,37 +266,37 @@ declare interface SvelteReactive
     *
     * Note: Will set empty string if title is undefined or null.
     *
-    * @param {string | undefined | null}   title - Application title; will be localized, so a translation key is fine.
+    * @param title - Application title; will be localized, so a translation key is fine.
     */
-   set title(title: string);
+   set title(title: string | undefined | null);
 
    // Accessors for UI state -----------------------------------------------------------------------------------------
 
    /**
     * Returns the current active Window / WindowProxy UI state.
     *
-    * @returns {Window} Active window UI state.
+    * @returns Active window UI state.
     */
    get activeWindow(): Window;
 
    /**
     * Returns the current dragging UI state.
     *
-    * @returns {boolean} Dragging UI state.
+    * @returns Dragging UI state.
     */
    get dragging(): boolean;
 
    /**
     * Returns the current minimized UI state.
     *
-    * @returns {boolean} Minimized UI state.
+    * @returns Minimized UI state.
     */
    get minimized(): boolean;
 
    /**
     * Returns the current resizing UI state.
     *
-    * @returns {boolean} Resizing UI state.
+    * @returns Resizing UI state.
     */
    get resizing(): boolean;
 
@@ -305,7 +305,7 @@ declare interface SvelteReactive
     *
     * Note: This is protected usage and used internally.
     *
-    * @param {Window} activeWindow - Active Window / WindowProxy UI state.
+    * @param activeWindow - Active Window / WindowProxy UI state.
     */
    set activeWindow(activeWindow: Window);
 
@@ -314,18 +314,18 @@ declare interface SvelteReactive
     * entries to walk. To access deeper entries into the object format the accessor string with `.` between entries
     * to walk.
     *
-    * @param {string}   accessor - The path / key to set. You can set multiple levels.
+    * @param accessor - The path / key to set. You can set multiple levels.
     *
-    * @param {*}        [defaultValue] - A default value returned if the accessor is not found.
+    * @param [defaultValue] - A default value returned if the accessor is not found.
     *
-    * @returns {*} Value at the accessor.
+    * @returns Value at the accessor.
     */
    getOptions(accessor: string, defaultValue?: any): any;
 
    /**
     * Provides a way to merge `options` into this applications options and update the appOptions store.
     *
-    * @param {object}   options - The options object to merge with `this.options`.
+    * @param options - The options object to merge with `this.options`.
     */
    mergeOptions(options: object): void;
 
@@ -337,9 +337,9 @@ declare interface SvelteReactive
     * Additionally, if an application shell Svelte component is mounted and exports the `appOptions` property then
     * the application options is set to `appOptions` potentially updating the application shell / Svelte component.
     *
-    * @param {string}   accessor - The path / key to set. You can set multiple levels.
+    * @param accessor - The path / key to set. You can set multiple levels.
     *
-    * @param {any}        value - Value to set.
+    * @param value - Value to set.
     */
    setOptions(accessor: string, value: any): void;
 
@@ -358,11 +358,11 @@ declare interface SvelteReactive
     * to remove the close button and {@link SvelteApp.Options.headerButtonNoLabel} to true and labels will be
     * removed from the header buttons.
     *
-    * @param {object} [opts] - Optional parameters (for internal use)
+    * @param [opts] - Optional parameters (for internal use)
     *
-    * @param {boolean} [opts.headerButtonNoClose] - The value for `headerButtonNoClose`.
+    * @param [opts.headerButtonNoClose] - The value for `headerButtonNoClose`.
     *
-    * @param {boolean} [opts.headerButtonNoLabel] - The value for `headerButtonNoLabel`.
+    * @param [opts.headerButtonNoLabel] - The value for `headerButtonNoLabel`.
     */
    updateHeaderButtons({ headerButtonNoClose, headerButtonNoLabel }?: {
       headerButtonNoClose?: boolean;

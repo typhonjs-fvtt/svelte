@@ -1,4 +1,4 @@
-import { SvelteApplication } from '../SvelteApplication.js';
+import { SvelteApplication } from '../SvelteApplication';
 
 /**
  * Handle `PopOut!` module hooks to allow applications to popout to their own browser window.

@@ -6,8 +6,12 @@ import {
    deepMerge,
    isObject }                 from '#runtime/util/object';
 
-import { TJSDialogData }      from './internal/state-dialog/index.js';
-import { SvelteApplication }  from './SvelteApplication.js';
+import { TJSDialogDataImpl }  from './internal/state-dialog';
+import { SvelteApplication }  from './SvelteApplication';
+
+import type {
+   TJSDialogData,
+    TJSDialogOptions }         from './internal/state-dialog/types';
 
 /**
  * Provides a reactive dialog implementation configured from a unique dialog options object. The dialog features a
@@ -45,11 +49,9 @@ import { SvelteApplication }  from './SvelteApplication.js';
  */
 export class TJSDialog extends SvelteApplication
 {
-   /** @type {TJSDialogData} */
-   #data;
+   readonly #data: TJSDialogData;
 
-   /** @type {ManagedPromise} */
-   #managedPromise;
+   readonly #managedPromise: ManagedPromise;
 
    /**
     * @param {import('./internal/state-dialog/types').TJSDialogOptions} data - Dialog options.
@@ -64,7 +66,7 @@ export class TJSDialog extends SvelteApplication
 
       this.#managedPromise = new ManagedPromise();
 
-      this.#data = new TJSDialogData(this);
+      this.#data = new TJSDialogDataImpl(this);
       this.#data.replace(data);
 
       /**

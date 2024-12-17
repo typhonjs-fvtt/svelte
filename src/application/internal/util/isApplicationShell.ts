@@ -1,4 +1,4 @@
-import { applicationShellContract } from './applicationShellContract.js';
+import { applicationShellContract } from './applicationShellContract';
 
 /**
  * Provides a method to determine if the passed in object / Svelte component follows the application shell contract.
@@ -8,11 +8,11 @@ import { applicationShellContract } from './applicationShellContract.js';
  * defines instance accessors versus on the prototype, so the check below ensures that all accessors in the contract are
  * either available on the prototype or directly on the instance.
  *
- * @param {*}  component - Object / component to test.
+ * @param component - Object / component to test.
  *
- * @returns {boolean} Whether the component is a ApplicationShell or TJSApplicationShell.
+ * @returns {boolean} Whether the component is an ApplicationShell or TJSApplicationShell.
  */
-export function isApplicationShell(component)
+export function isApplicationShell(component: unknown): boolean
 {
    if (component === null || component === void 0) { return false; }
 

@@ -19,18 +19,18 @@ declare interface ApplicationState {
    /**
     * Returns current application state along with any extra data passed into method.
     *
-    * @param {object} [extra] - Extra data to add to application state.
+    * @param [extra] - Extra data to add to application state.
     *
-    * @returns {ApplicationStateData} Passed in object with current application state.
+    * @returns Passed in object with current application state.
     */
    current(extra?: object): ApplicationStateData;
 
    /**
     * Gets any saved application state by name.
     *
-    * @param {object}   options - Options.
+    * @param options - Options.
     *
-    * @param {string}   options.name - Saved data set name.
+    * @param options.name - Saved data set name.
     *
     * @returns {ApplicationStateData | undefined} Any saved application state.
     */
@@ -39,18 +39,18 @@ declare interface ApplicationState {
    }): ApplicationStateData | undefined;
 
    /**
-    * @returns {IterableIterator<string>} The saved application state names / keys.
+    * @returns The saved application state names / keys.
     */
    keys(): IterableIterator<string>;
 
    /**
     * Removes and returns any saved application state by name.
     *
-    * @param {object}   options - Options.
+    * @param options - Options.
     *
-    * @param {string}   options.name - Name to remove and retrieve.
+    * @param options.name - Name to remove and retrieve.
     *
-    * @returns {ApplicationStateData | undefined} Any saved application state.
+    * @returns Any saved application state.
     */
    remove({ name }: {
       name: string;
@@ -61,19 +61,19 @@ declare interface ApplicationState {
     * available to animate / tween to the new state. When `animateTo` is true an animation is scheduled via
     * {@link #runtime/svelte/store/position!AnimationAPI.to} and the duration and easing name or function may be specified.
     *
-    * @param {object}            options - Parameters
+    * @param options - Parameters
     *
-    * @param {string}            options.name - Saved data set name.
+    * @param options.name - Saved data set name.
     *
-    * @param {boolean}           [options.remove=false] - Remove data set.
+    * @param [options.remove=false] - Remove data set.
     *
-    * @param {boolean}           [options.animateTo=false] - Animate to restore data.
+    * @param [options.animateTo=false] - Animate to restore data.
     *
-    * @param {number}            [options.duration=0.1] - Duration in seconds.
+    * @param [options.duration=0.1] - Duration in seconds.
     *
-    * @param {EasingReference}   [options.ease='linear'] - Easing function name or function.
+    * @param [options.ease='linear'] - Easing function name or function.
     *
-    * @returns {ApplicationStateData | undefined} Any saved application state.
+    * @returns Any saved application state.
     */
    restore({ name, remove, animateTo, duration, ease }: {
       name: string;
@@ -86,11 +86,11 @@ declare interface ApplicationState {
    /**
     * Saves current application state with the opportunity to add extra data to the saved state.
     *
-    * @param {object}   options - Options.
+    * @param options - Options.
     *
-    * @param {string}   options.name - Name to index this saved state.
+    * @param options.name - Name to index this saved state.
     *
-    * @param {...*}     [options.extra] - Extra data to add to saved state.
+    * @param [options.extra] - Extra data to add to saved state.
     *
     * @returns {ApplicationStateData} Current saved application state.
     */

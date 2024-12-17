@@ -1,3 +1,5 @@
+import type { SvelteApplication } from '../SvelteApplication';
+
 /**
  * Provides an index of all visible rendered {@link SvelteApplication} instances in a given Svelte runtime. This allows
  * bulk operations to be performed across all apps.
@@ -7,18 +9,18 @@ export class TJSAppIndex
    /**
     * Stores all visible / rendered apps.
     *
-    * @type {Map<string, import('#svelte-fvtt/application').SvelteApplication>}
+    * @type {Map<string, SvelteApplication>}
     */
-   static #visibleApps = new Map();
+   static #visibleApps: Map<string, SvelteApplication> = new Map();
 
    /**
     * Adds a SvelteApplication to all visible apps tracked.
     *
-    * @param {import('#svelte-fvtt/application').SvelteApplication} app - A SvelteApplication
+    * @param app - A SvelteApplication
     *
     * @package
     */
-   static add(app)
+   static add(app: SvelteApplication)
    {
       this.#visibleApps.set(app.id, app);
    }
@@ -26,11 +28,11 @@ export class TJSAppIndex
    /**
     * Removes a SvelteApplication from all visible apps tracked.
     *
-    * @param {import('#svelte-fvtt/application').SvelteApplication} app - A SvelteApplication
+    * @param app - A SvelteApplication
     *
     * @package
     */
-   static delete(app)
+   static delete(app: SvelteApplication)
    {
       this.#visibleApps.delete(app.id);
    }
@@ -38,11 +40,11 @@ export class TJSAppIndex
    /**
     * Gets a particular app by ID.
     *
-    * @param {string}   key - App ID.
+    * @param key - App ID.
     *
-    * @returns {import('#svelte-fvtt/application').SvelteApplication} Associated app.
+    * @returns Associated app.
     */
-   static get(key)
+   static get(key: string): SvelteApplication
    {
       return this.#visibleApps.get(key);
    }
@@ -50,27 +52,27 @@ export class TJSAppIndex
    /**
     * Returns whether an associated app by ID is being tracked.
     *
-    * @param {string}   key - App ID.
+    * @param key - App ID.
     *
-    * @returns {boolean} The given App ID is visible.
+    * @returns The given App ID is visible.
     */
-   static has(key)
+   static has(key: string): boolean
    {
       return this.#visibleApps.has(key);
    }
 
    /**
-    * @returns {IterableIterator<string>} All visible app IDs.
+    * @returns All visible app IDs.
     */
-   static keys()
+   static keys(): IterableIterator<string>
    {
       return this.#visibleApps.keys();
    }
 
    /**
-    * @returns {IterableIterator<import('#svelte-fvtt/application').SvelteApplication>} All visible apps.
+    * @returns All visible apps.
     */
-   static values()
+   static values(): IterableIterator<SvelteApplication>
    {
       return this.#visibleApps.values();
    }

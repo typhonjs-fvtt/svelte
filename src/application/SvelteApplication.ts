@@ -9,11 +9,15 @@ import {
    isObject }              from '#runtime/util/object';
 
 import {
-   ApplicationState,
+   ApplicationStateImpl,
    GetSvelteData,
    loadSvelteConfig,
    SvelteReactive,
    TJSAppIndex }           from './internal/index.js';
+
+import type { TJSPositionTypes } from '#runtime/svelte/store/position';
+
+import type { MountedAppShell }  from './internal/state-svelte/types';
 
 /**
  * Provides a Svelte aware extension to the Foundry {@link Application} class to manage the app lifecycle
@@ -22,38 +26,28 @@ import {
  *
  * @template [Options = import('./types').SvelteApp.Options]
  * @augments {Application<Options>}
- *
- * @implements {import('#runtime/svelte/store/position').TJSPositionTypes.Positionable}
  */
-export class SvelteApplication extends Application
+export class SvelteApplication extends Application implements TJSPositionTypes.Positionable
 {
    /**
     * Stores the first mounted component which follows the application shell contract.
-    *
-    * @type {import('./internal/state-svelte/types').MountedAppShell[] | null[]} Application shell.
     */
-   #applicationShellHolder = [null];
+   #applicationShellHolder: MountedAppShell[] | null[] = [null];
 
    /**
     * Stores and manages application state for saving / restoring / serializing.
-    *
-    * @type {ApplicationState}
     */
-   #applicationState;
+   #applicationState: ApplicationStateImpl;
 
    /**
     * Stores the target element which may not necessarily be the main element.
-    *
-    * @type {HTMLElement}
     */
-   #elementTarget = null;
+   #elementTarget: HTMLElement = null;
 
    /**
     * Stores the content element which is set for application shells.
-    *
-    * @type {HTMLElement}
     */
-   #elementContent = null;
+   #elementContent: HTMLElement = null;
 
    /**
     * On initial render gating of `setPosition` invoked by `Application._render` occurs, so that percentage values
@@ -125,8 +119,8 @@ export class SvelteApplication extends Application
          throw new Error(`SvelteApplication - constructor - No Svelte configuration object found in 'options'.`);
       }
 
-      /** @type {ApplicationState} */
-      this.#applicationState = new ApplicationState(this);
+      /** @type {ApplicationStateImpl} */
+      this.#applicationState = new ApplicationStateImpl(this);
 
       // Initialize TJSPosition with the position object set by Application.
       this.#position = new TJSPosition(this, {

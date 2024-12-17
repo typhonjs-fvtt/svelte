@@ -3,30 +3,32 @@ import {
    isObject,
    klona,
    safeAccess,
-   safeSet }   from '#runtime/util/object';
+   safeSet }                        from '#runtime/util/object';
+
+import type {
+   TJSDialogButtonData,
+   TJSDialogData,
+   TJSDialogOptions }               from './types';
+
+import type { SvelteApplication }   from '../../SvelteApplication';
 
 /**
  * Provides storage for all dialog options through individual accessors and `get`, `merge`, `replace` and `set` methods
  * that safely access and update data changed to the mounted DialogShell component reactively.
  */
-export class TJSDialogData
+export class TJSDialogDataImpl implements TJSDialogData
 {
-   /**
-    * @type {import('../../index.js').SvelteApplication}
-    */
-   #application;
+   readonly #application: SvelteApplication;
 
    /**
     * Stores the dialog options data.
-    *
-    * @type {import('./types').TJSDialogOptions}
     */
-   #internal = {};
+   #internal: TJSDialogOptions = {};
 
    /**
-    * @param {import('../../index.js').SvelteApplication} application - The host Foundry application.
+    * @param application - The host SvelteApplication instance.
     */
-   constructor(application)
+   constructor(application: SvelteApplication)
    {
       this.#application = application;
 
@@ -34,9 +36,9 @@ export class TJSDialogData
    }
 
    /**
-    * @returns {{ [key: string]: import('./types').TJSDialogButtonData }} The dialog button configuration.
+    * @returns The dialog button configuration.
     */
-   get buttons()
+   get buttons(): { [key: string]: TJSDialogButtonData }
    {
       return this.#internal.buttons;
    }
@@ -44,9 +46,9 @@ export class TJSDialogData
    /**
     * Set the dialog button configuration.
     *
-    * @param {string} buttons - New dialog button configuration.
+    * @param buttons - New dialog button configuration.
     */
-   set buttons(buttons)
+   set buttons(buttons: { [key: string]: TJSDialogButtonData })
    {
       this.#internal.buttons = buttons;
       this.#updateComponent();
