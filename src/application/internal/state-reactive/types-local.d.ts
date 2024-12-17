@@ -1,4 +1,4 @@
-import { Updater } from 'svelte/store';
+import { Updater } from '#svelte/store';
 
 interface SvelteReactiveStores {
    /**

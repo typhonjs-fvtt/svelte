@@ -1,33 +1,41 @@
-import { TJSPosition }     from '#runtime/svelte/store/position';
-import { TJSSvelteUtil }   from '#runtime/svelte/util';
-import { A11yHelper }      from '#runtime/util/a11y';
-import { CrossWindow }     from '#runtime/util/browser';
+import { TJSPosition }           from '#runtime/svelte/store/position';
+import { TJSSvelteUtil }         from '#runtime/svelte/util';
+import { A11yHelper }            from '#runtime/util/a11y';
+import { CrossWindow }           from '#runtime/util/browser';
 
 import {
    deepMerge,
    hasGetter,
-   isObject }              from '#runtime/util/object';
+   isObject }                    from '#runtime/util/object';
 
 import {
    ApplicationStateImpl,
-   GetSvelteData,
+   GetSvelteDataImpl,
    loadSvelteConfig,
-   SvelteReactive,
-   TJSAppIndex }           from './internal/index.js';
+   SvelteReactiveImpl,
+   TJSAppIndex }                 from './internal';
 
 import type { TJSPositionTypes } from '#runtime/svelte/store/position';
 
-import type { MountedAppShell }  from './internal/state-svelte/types';
+import type { SvelteApp }        from './types';
+
+import {
+   ApplicationState,
+   GetSvelteData,
+   MountedAppShell,
+   SvelteData,
+   SvelteReactive }              from './internal/types';
+
+import type {
+   SvelteReactiveStores }        from './internal/state-reactive/types-local';
 
 /**
  * Provides a Svelte aware extension to the Foundry {@link Application} class to manage the app lifecycle
  * appropriately. You can declaratively load one or more components from `defaultOptions` using a
  * {@link #runtime/svelte/util!TJSSvelteConfig} object in the {@link SvelteApp.Options.svelte} property.
- *
- * @template [Options = import('./types').SvelteApp.Options]
- * @augments {Application<Options>}
  */
-export class SvelteApplication extends Application implements TJSPositionTypes.Positionable
+export class SvelteApplication<Options extends SvelteApp.Options = SvelteApp.Options> extends Application<Options>
+ implements TJSPositionTypes.Positionable
 {
    /**
     * Stores the first mounted component which follows the application shell contract.
@@ -52,53 +60,39 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
    /**
     * On initial render gating of `setPosition` invoked by `Application._render` occurs, so that percentage values
     * can correctly be positioned with initial helper constraints (centered).
-    *
-    * @type {boolean}
     */
-   #gateSetPosition = false;
+   #gateSetPosition: boolean = false;
 
    /**
     * Stores initial z-index from `_renderOuter` to set to target element / Svelte component.
-    *
-    * @type {number}
     */
-   #initialZIndex = 95;
+   #initialZIndex: number = 95;
 
    /**
     * Stores on mount state which is checked in _render to trigger onSvelteMount callback.
-    *
-    * @type {boolean}
     */
-   #onMount = false;
+   #onMount: boolean = false;
 
    /**
     * The position store.
-    *
-    * @type {TJSPosition}
     */
-   #position;
+   readonly #position: TJSPosition;
 
    /**
     * Contains the Svelte stores and reactive accessors.
-    *
-    * @type {SvelteReactive}
     */
-   #reactive;
+   readonly #reactive: SvelteReactiveImpl;
 
    /**
     * Stores SvelteData entries with instantiated Svelte components.
-    *
-    * @type {import('./internal/state-svelte/types').SvelteData[]}
     */
-   #svelteData = [];
+   readonly #svelteData: SvelteData[] = [];
 
    /**
     * Provides a helper class that combines multiple methods for interacting with the mounted components tracked in
     * #svelteData.
-    *
-    * @type {GetSvelteData}
     */
-   #getSvelteData = new GetSvelteData(this.#applicationShellHolder, this.#svelteData);
+   readonly #getSvelteData: GetSvelteDataImpl = new GetSvelteDataImpl(this.#applicationShellHolder, this.#svelteData);
 
    /**
     * Contains methods to interact with the Svelte stores.
@@ -124,6 +118,7 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
 
       // Initialize TJSPosition with the position object set by Application.
       this.#position = new TJSPosition(this, {
+         // @ts-ignore
          ...this.position,
          ...this.options,
          initial: this.options.positionInitial,
@@ -132,6 +127,7 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
       });
 
       // Remove old position field.
+      // @ts-ignore
       delete this.position;
 
       /**
@@ -146,7 +142,7 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
          set: (position) => { if (isObject(position)) { this.#position.set(position); } }
       });
 
-      this.#reactive = new SvelteReactive(this);
+      this.#reactive = new SvelteReactiveImpl(this);
 
       this.#stores = this.#reactive.initialize();
    }
@@ -154,12 +150,12 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
    /**
     * Specifies the default options that SvelteApplication supports.
     *
-    * @returns {import('./types').SvelteApp.Options} options - Application options.
+    * @returns options - Application options.
     * @see https://foundryvtt.com/api/interfaces/client.ApplicationOptions.html
     */
-   static get defaultOptions()
+   static get defaultOptions(): SvelteApp.Options
    {
-      return /** @type {import('./types').SvelteApp.Options} */ deepMerge(super.defaultOptions, {
+      return deepMerge(super.defaultOptions, {
          defaultCloseAnimation: true,     // If false the default slide close animation is not run.
          draggable: true,                 // If true then application shells are draggable.
          focusAuto: true,                 // When true auto-management of app focus is enabled.
@@ -179,43 +175,43 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
          sessionStorage: void 0,          // An instance of WebStorage (session) to share across SvelteApplications.
          svelte: void 0,                  // A Svelte configuration object.
          transformOrigin: 'top left'      // By default, 'top / left' respects rotation when minimizing.
-      });
+      }) as SvelteApp.Options;
    }
 
    /**
     * Returns the content element if an application shell is mounted.
     *
-    * @returns {HTMLElement} Content element.
+    * @returns Content element.
     */
-   get elementContent() { return this.#elementContent; }
+   get elementContent(): HTMLElement { return this.#elementContent; }
 
    /**
     * Returns the target element or main element if no target defined.
     *
-    * @returns {HTMLElement} Target element.
+    * @returns Target element.
     */
-   get elementTarget() { return this.#elementTarget; }
+   get elementTarget(): HTMLElement { return this.#elementTarget; }
 
    /**
     * Returns the reactive accessors & Svelte stores for SvelteApplication.
     *
-    * @returns {import('./internal/state-reactive/types').SvelteReactive} The reactive accessors & Svelte stores.
+    * @returns {SvelteReactive} The reactive accessors & Svelte stores.
     */
-   get reactive() { return this.#reactive; }
+   get reactive(): SvelteReactive { return this.#reactive; }
 
    /**
     * Returns the application state manager.
     *
-    * @returns {import('./internal/state-app/types').ApplicationState} The application state manager.
+    * @returns The application state manager.
     */
-   get state() { return this.#applicationState; }
+   get state(): ApplicationState { return this.#applicationState; }
 
    /**
     * Returns the Svelte helper class w/ various methods to access mounted Svelte components.
     *
-    * @returns {import('./internal/state-svelte/types').GetSvelteData} GetSvelteData
+    * @returns GetSvelteData
     */
-   get svelte() { return this.#getSvelteData; }
+   get svelte(): GetSvelteData { return this.#getSvelteData; }
 
    /**
     * In this case of when a template is defined in app options `html` references the inner HTML / template. However,
@@ -226,7 +222,7 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
     * @ignore
     * @internal
     */
-   _activateCoreListeners(html)
+   _activateCoreListeners(html: any)
    {
       super._activateCoreListeners(typeof this.options.template === 'string' ? html :
        [this.popOut ? this.#elementTarget?.firstChild : this.#elementTarget]);
@@ -236,35 +232,32 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
     * Provide an override to set this application as the active window regardless of z-index. Changes behaviour from
     * Foundry core.
     *
-    * @param {object} [opts] - Optional parameters.
+    * @param [opts] - Optional parameters.
     *
-    * @param {boolean} [opts.focus=true] - When true and the active element is not contained in the app `elementTarget`
+    * @param [opts.focus=true] - When true and the active element is not contained in the app `elementTarget`
     *        is focused..
     *
-    * @param {boolean} [opts.force=false] - Force bring to top; will increment z-index by popOut order.
+    * @param [opts.force=false] - Force bring to top; will increment z-index by popOut order.
     *
     * @ignore
     * @internal
     */
-   bringToTop({ focus = true, force = false } = {})
+   bringToTop({ focus = true, force = false }: { focus?: boolean; force?: boolean; } = {})
    {
       // Only perform bring to top when the active window is the main Foundry window instance.
-      if (this.reactive.activeWindow !== globalThis) { return; }
+      if (this.reactive.activeWindow !== window) { return; }
 
       if (force || this.popOut) { super.bringToTop(); }
 
-      const elementTarget = this.elementTarget;
-      const activeElement = document.activeElement;
+      const elementTarget: HTMLElement = this.elementTarget;
+      const activeElement: Element = document.activeElement;
 
       // If the activeElement is not contained in this app via elementTarget then blur the current active element
       // and make elementTarget focused.
       if (focus && elementTarget && activeElement !== elementTarget && !elementTarget?.contains(activeElement))
       {
          // Blur current active element.
-         if (A11yHelper.isFocusTarget(activeElement))
-         {
-            activeElement.blur();
-         }
+         if (A11yHelper.isFocusTarget(activeElement)) { (activeElement as HTMLElement)?.blur(); }
 
          elementTarget?.focus();
       }
@@ -284,27 +277,26 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
     * Close the application and unregisters references to it within UI mappings.
     * This function returns a Promise which resolves once the window closing animation concludes.
     *
-    * @param {object}   [options] - Optional parameters.
+    * @param [options] - Optional parameters.
     *
-    * @param {boolean}  [options.force] - Force close regardless of render state.
+    * @param [options.force] - Force close regardless of render state.
     *
-    * @returns {Promise<void>}    A Promise which resolves once the application is closed.
+    * @returns A Promise which resolves once the application is closed.
     *
     * @ignore
     * @internal
     */
-   async close(options = {})
+   async close(options: { force?: boolean } = {}): Promise<void>
    {
       const states = Application.RENDER_STATES;
 
+      // @ts-ignore
       if (!options.force && ![states.RENDERED, states.ERROR].includes(this._state)) { return; }
 
       /**
        * Get the element.
-       *
-       * @type {HTMLElement}
        */
-      const el = this.#elementTarget;
+      const el: HTMLElement = this.#elementTarget;
       if (!el)
       {
          /**
@@ -318,7 +310,7 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
 
       // Support for PopOut! module; `close` is double invoked; once before the element is rejoined to the main window.
       // Reject close invocations when the element window is not the main originating window / globalThis.
-      if (CrossWindow.getWindow(el, { throws: false }) !== globalThis) { return; }
+      if (CrossWindow.getWindow(el, { throws: false }) !== window) { return; }
 
       /**
        * @ignore
@@ -331,7 +323,7 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
 
       // Make any window content overflow hidden to avoid any scrollbars appearing in default or Svelte outro
       // transitions.
-      const content = el.querySelector('.window-content');
+      const content: HTMLElement = el.querySelector('.window-content');
       if (content)
       {
          content.style.overflow = 'hidden';
@@ -340,11 +332,12 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
          // they are likely one level deep.
          for (let cntr = content.children.length; --cntr >= 0;)
          {
-            content.children[cntr].style.overflow = 'hidden';
+            (content.children[cntr] as HTMLElement).style.overflow = 'hidden';
          }
       }
 
       // Dispatch Hooks for closing the base and subclass applications
+      // @ts-ignore
       for (const cls of this.constructor._getInheritanceChain())
       {
          /**
@@ -352,14 +345,15 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
           *
           * Note: JQuery wrapping as Foundry event arguments uses JQuery.
           */
+         //@ts-ignore
          Hooks.call(`close${cls.name}`, this, $(el));
       }
 
       // If options `defaultCloseAnimation` is false then do not execute the standard slide up animation.
       // This allows Svelte components to provide any out transition. Application shells will automatically set
       // `defaultCloseAnimation` based on any out transition set or unset.
-      const animate = typeof this.options.defaultCloseAnimation === 'boolean' ? this.options.defaultCloseAnimation :
-       true;
+      const animate: boolean = typeof this.options.defaultCloseAnimation === 'boolean' ?
+       this.options.defaultCloseAnimation : true;
 
       if (animate)
       {
@@ -385,10 +379,12 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
          svelteDestroyPromises.push(TJSSvelteUtil.outroAndDestroy(entry.component));
 
          // If any proxy eventbus has been added then remove all event registrations from the component.
+         // @ts-ignore
          const eventbus = entry.config.eventbus;
          if (isObject(eventbus) && typeof eventbus.off === 'function')
          {
             eventbus.off();
+            // @ts-ignore
             entry.config.eventbus = void 0;
          }
       }
@@ -447,7 +443,8 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
       this.#onMount = false;
 
       // Update the minimized UI store state.
-      this.#stores.uiStateUpdate((storeOptions) => deepMerge(storeOptions, { minimized: this._minimized }));
+      this.#stores.uiStateUpdate((storeOptions: object): object => deepMerge(storeOptions,
+       { minimized: this._minimized }));
 
       // Apply any stored focus options and then remove them from options.
       A11yHelper.applyFocusSource(this.options.focusSource);
@@ -464,7 +461,7 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
     * @ignore
     * @internal
     */
-   _injectHTML()
+   _injectHTML(): void
    {
       // Make sure the store is updated with the latest header buttons. Also allows filtering buttons before display.
       this.reactive.updateHeaderButtons();
@@ -537,8 +534,8 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
       // in `this.#initialZIndex`.
       if (typeof this.options.positionable === 'boolean' && this.options.positionable)
       {
-         this.#elementTarget.style.zIndex = typeof this.options.zIndex === 'number' ? this.options.zIndex :
-          this.#initialZIndex ?? 95;
+         this.#elementTarget.style.zIndex = String(typeof this.options.zIndex === 'number' ? this.options.zIndex :
+          this.#initialZIndex ?? 95);
       }
 
       // Subscribe to local store handling.
@@ -553,13 +550,13 @@ export class SvelteApplication extends Application implements TJSPositionTypes.P
     * correctly. Extra constraint data is stored in a saved position state in {@link SvelteApplication.minimize}
     * to animate the content area.
     *
-    * @param {object}   [opts] - Optional parameters.
+    * @param [opts] - Optional parameters.
     *
-    * @param {boolean}  [opts.animate=true] - When true perform default maximizing animation.
+    * @param [opts.animate=true] - When true perform default maximizing animation.
     *
-    * @param {number}   [opts.duration=0.1] - Controls content area animation duration in seconds.
+    * @param [opts.duration=0.1] - Controls content area animation duration in seconds.
     */
-   async maximize({ animate = true, duration = 0.1 } = {})
+   async maximize({ animate = true, duration = 0.1 }: { animate?: boolean; duration?: number } = {})
    {
       if (!this.popOut || [false, null].includes(this._minimized)) { return; }
 

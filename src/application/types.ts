@@ -41,7 +41,7 @@ declare namespace SvelteApp {
    /**
     * Options for SvelteApplication. Note: that this extends the Foundry `ApplicationOptions`.
     */
-   interface Options
+   interface Options extends ApplicationOptions
    {
       /**
        * If false the default slide close animation is not run.
@@ -179,6 +179,11 @@ declare namespace SvelteApp {
        * @defaultValue 'top left'
        */
       transformOrigin: TransformAPI.TransformOrigin;
+
+      /**
+       *
+       */
+      zIndex: number;
 
       // The following are overrides of core Foundry `ApplicationOptions` providing type expansion and comments.
 

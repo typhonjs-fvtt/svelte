@@ -1,9 +1,9 @@
 import {
    FoundryHMRSupport,
-   PopoutSupport }   from './external/index.js';
+   PopoutSupport }   from './external';
 
-export * from './SvelteApplication.js';
-export * from './TJSDialog.js';
+export * from './SvelteApplication';
+export * from './TJSDialog';
 
 // Handle `hotReload` Foundry hook when running the Vite dev server.
 if (import.meta.hot) { FoundryHMRSupport.initialize(); }

@@ -6,8 +6,10 @@ import { isApplicationShell }       from './isApplicationShell';
 
 import type {
    ComponentConstructorOptions,
-   SvelteComponent }                from 'svelte';
+   SvelteComponent }                from '#svelte';
+
 import type { TJSSvelteConfig }     from '#runtime/svelte/util';
+
 import type { SvelteData }          from '../state-svelte/types';
 import type { SvelteApplication }   from '../../SvelteApplication';
 
@@ -25,7 +27,7 @@ import type { SvelteApplication }   from '../../SvelteApplication';
  * @returns {SvelteData} The config + instantiated Svelte component.
  */
 export function loadSvelteConfig({ app, config, elementRootUpdate }:
- { app?: SvelteApplication; config?: TJSSvelteConfig; elementRootUpdate: Function; }): SvelteData
+ { app?: SvelteApplication; config?: Partial<TJSSvelteConfig>; elementRootUpdate: Function; }): SvelteData
 {
    let target: HTMLElement;
 

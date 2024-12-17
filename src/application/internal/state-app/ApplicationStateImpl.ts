@@ -1,15 +1,16 @@
-import { isObject }  from '#runtime/util/object';
+import { isObject }                 from '#runtime/util/object';
 
-import type { EasingReference }        from '#runtime/svelte/easing';
+import type { EasingReference }     from '#runtime/svelte/easing';
+
 import type {
    Data,
-   TJSPositionTypes }                  from "#runtime/svelte/store/position";
+   TJSPositionTypes }               from '#runtime/svelte/store/position';
 
-import type { SvelteApplication }      from '../../SvelteApplication';
+import type { SvelteApplication }   from '../../SvelteApplication';
 
 import type {
    ApplicationState,
-   ApplicationStateData }              from './types';
+   ApplicationStateData }           from './types';
 
 /**
  * Provides the ability the save / restore / serialize application state for positional and UI state such as minimized
@@ -19,7 +20,7 @@ import type {
  */
 export class ApplicationStateImpl implements ApplicationState
 {
-   readonly #application: SvelteApplication & TJSPositionTypes.Positionable;
+   readonly #application: SvelteApplication;
 
    /**
     * Stores the current save state key being restored by animating. When a restore is already being animated with the
@@ -32,7 +33,7 @@ export class ApplicationStateImpl implements ApplicationState
    /**
     * @param application - The application.
     */
-   constructor(application: SvelteApplication & TJSPositionTypes.Positionable)
+   constructor(application: SvelteApplication)
    {
       this.#application = application;
 
